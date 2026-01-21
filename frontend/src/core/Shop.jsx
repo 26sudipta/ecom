@@ -136,7 +136,7 @@ const Shop = () => {
       className='container-fluid'
     >
       <Search />
-      <Grid container spacing={2}>
+      <Grid container spacing={{ xs: 2, md: 3 }} sx={{ px: { xs: 2, md: 3 } }}>
         <Grid size={{ xs: 12, md: 3 }}>
           <CategoriesFilter
             categories={categories}
@@ -148,7 +148,7 @@ const Shop = () => {
           />
         </Grid>
         <Grid size={{ xs: 12, md: 9 }}>
-          <Typography variant='h4' gutterBottom>
+          <Typography variant='h4' gutterBottom sx={{ fontSize: { xs: '1.5rem', md: '2rem' } }}>
             Products
           </Typography>
           <Box

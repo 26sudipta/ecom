@@ -26,7 +26,7 @@ const Cart = () => {
 
   const showItems = (items) => (
     <Stack spacing={3}>
-      <Typography variant='h5' textAlign='center' gutterBottom>
+      <Typography variant='h5' textAlign='center' gutterBottom sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
         Your Cart ({items.length} {items.length === 1 ? 'Item' : 'Items'})
       </Typography>
       <Divider />
@@ -69,10 +69,10 @@ const Cart = () => {
       description='Manage your cart items. Add remove checkout or continue shopping.'
     >
       {items.length > 0 ? (
-        <Grid container spacing={2}>
+        <Grid container spacing={{ xs: 2, md: 3 }} sx={{ px: { xs: 2, md: 3 } }}>
           {/* Cart Items */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
+            <Paper elevation={2} sx={{ p: { xs: 2, md: 3 }, height: '100%' }}>
               {showItems(items)}
             </Paper>
           </Grid>

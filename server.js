@@ -13,6 +13,7 @@ const categoryRoutes = require('./routes/category');
 const productRoutes = require('./routes/product');
 const braintreeRoutes = require('./routes/braintree');
 const orderRoutes = require('./routes/order');
+const reviewRoutes = require('./routes/review');
 
 // app
 const app = express();
@@ -57,6 +58,7 @@ app.use('/api', categoryRoutes);
 app.use('/api', productRoutes);
 app.use('/api', braintreeRoutes);
 app.use('/api', orderRoutes);
+app.use('/api', reviewRoutes);
 
 // Server static assets if in production
 if (process.env.NODE_ENV === 'production') {

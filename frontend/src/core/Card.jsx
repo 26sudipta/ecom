@@ -47,7 +47,9 @@ const Card = ({
           href={`/product/${product._id}`}
           variant='contained'
           color='primary'
-          sx={{ mr: 1 }}
+          size="small"
+          fullWidth
+          sx={{ mb: { xs: 1, sm: 0 }, mr: { sm: 1 } }}
         >
           View Product
         </Button>
@@ -83,6 +85,8 @@ const Card = ({
           onClick={addToCart}
           variant='outlined'
           color='secondary'
+          size="small"
+          fullWidth
           startIcon={<ShoppingCartIcon />}
           disabled={product.quantity < 1}
         >

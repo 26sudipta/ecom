@@ -6,12 +6,12 @@ export default function Copyright() {
   return (
     <Box mt={8} mb={4}>
       <Typography variant='body2' color='text.secondary' align='center'>
-        {'Copyright © '}
-        <Link color='inherit' href='#'>
-          Ashraf Kabir
-        </Link>{' '}
+        {'© '}
         {new Date().getFullYear()}
-        {'.'}
+        {' Baraz. All rights reserved. | Developed by '}
+        <Link color='inherit' href='#'>
+          Sudipta Das
+        </Link>
       </Typography>
     </Box>
   );

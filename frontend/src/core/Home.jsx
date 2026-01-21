@@ -3,7 +3,9 @@ import Layout from './Layout';
 import { getProducts } from './apiCore.js';
 import Card from './Card.jsx';
 import Search from './Search';
-import Copyright from './Copyright.jsx';
+import Footer from '../components/Footer';
+import HeroBanner from '../components/HeroBanner';
+import ReviewSlider from '../components/ReviewSlider';
 import { Box, Container, Typography } from '@mui/material';
 
 const Home = () => {
@@ -56,59 +58,71 @@ const Home = () => {
 
   return (
     <Layout
-      title='Home page'
-      description='MERN E-commerce App'
+      title=''
+      description=''
       className='container-fluid'
+      hideHeader={true}
     >
+      <HeroBanner />
       <Search />
-      <Container maxWidth='lg'>
-        <Box sx={{ my: 4 }}>
-          {/* Debug info */}
-          <Typography variant='caption' color='text.secondary' sx={{ mb: 2, display: 'block' }}>
-            New Arrivals: {productsByArrival.length} products | Best Sellers: {productsBySell.length} products
-          </Typography>
-          
-          <Typography variant='h4' gutterBottom>
+      <Container maxWidth='lg' sx={{ px: { xs: 2, sm: 3 } }}>
+        <Box sx={{ my: { xs: 3, md: 4 } }}>
+          <Typography variant='h4' gutterBottom sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, fontWeight: 'bold' }}>
             New Arrivals
           </Typography>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(3, 1fr)',
-              },
-              gap: 3,
-              mb: 4,
-            }}
-          >
-            {Array.isArray(productsByArrival) && productsByArrival.map((product, i) => (
-              <Card key={i} product={product} />
-            ))}
-          </Box>
+          
+          {productsByArrival.length === 0 ? (
+            <Typography variant='body1' color='text.secondary' sx={{ mb: 4 }}>
+              Loading products...
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: '1fr',
+                  sm: 'repeat(2, 1fr)',
+                  md: 'repeat(3, 1fr)',
+                },
+                gap: 3,
+                mb: 4,
+              }}
+            >
+              {Array.isArray(productsByArrival) && productsByArrival.map((product, i) => (
+                <Card key={i} product={product} />
+              ))}
+            </Box>
+          )}
 
-          <Typography variant='h4' gutterBottom>
+          <Typography variant='h4' gutterBottom sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, fontWeight: 'bold' }}>
             Best Sellers
           </Typography>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(3, 1fr)',
-              },
-              gap: 3,
-            }}
-          >
-            {Array.isArray(productsBySell) && productsBySell.map((product, i) => (
-              <Card key={i} product={product} />
-            ))}
-          </Box>
+          
+          {productsBySell.length === 0 ? (
+            <Typography variant='body1' color='text.secondary' sx={{ mb: 4 }}>
+              Loading products...
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: '1fr',
+                  sm: 'repeat(2, 1fr)',
+                  md: 'repeat(3, 1fr)',
+                },
+                gap: 3,
+              }}
+            >
+              {Array.isArray(productsBySell) && productsBySell.map((product, i) => (
+                <Card key={i} product={product} />
+              ))}
+            </Box>
+          )}
         </Box>
       </Container>
-      <Copyright />
+      <ReviewSlider />
+      <Footer />
     </Layout>
   );
 };

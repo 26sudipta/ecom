@@ -28,6 +28,8 @@ import {
   PersonAdd,
   ExitToApp,
   Store,
+  ContactMail,
+  Info,
   Menu as MenuIcon,
 } from '@mui/icons-material';
 
@@ -61,6 +63,8 @@ const MaterialAppBar = () => {
   const navItems = [
     { path: '/', label: 'Home', icon: <Home />, show: true },
     { path: '/shop', label: 'Shop', icon: <Storefront />, show: true },
+    { path: '/about', label: 'About', icon: <Info />, show: true },
+    { path: '/contact', label: 'Contact', icon: <ContactMail />, show: true },
     {
       path: '/cart',
       label: 'Cart',
@@ -228,7 +232,7 @@ const MaterialAppBar = () => {
               color: 'white',
             }}
           >
-            BRAND
+            Baraz
           </Typography>
         </Box>
 

@@ -3,11 +3,14 @@ import { useParams } from 'react-router-dom';
 import Layout from './Layout';
 import { read, listRelated } from './apiCore';
 import Card from './Card';
+import ReviewForm from '../components/ReviewForm';
+import ProductReviews from '../components/ProductReviews';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
+import Divider from '@mui/material/Divider';
 
 const Product = () => {
   const [product, setProduct] = useState(null);
@@ -34,6 +37,11 @@ const Product = () => {
     });
   };
 
+  const handleReviewSubmitted = () => {
+    // Refresh product reviews
+    loadSingleProduct(productId);
+  };
+
   useEffect(() => {
     loadSingleProduct(productId);
   }, [productId]);
@@ -44,7 +52,7 @@ const Product = () => {
       description={product?.description?.substring(0, 100) || ''}
       className='container-fluid'
     >
-      <Box sx={{ flexGrow: 1, p: 3 }}>
+      <Box sx={{ flexGrow: 1, p: { xs: 2, md: 3 } }}>
         {error && (
           <Alert severity='error' sx={{ mb: 3 }}>
             {error}
@@ -89,6 +97,24 @@ const Product = () => {
             </Box>
           </Grid>
         </Grid>
+
+        {/* Reviews Section */}
+        {product && (
+          <Box sx={{ mt: 6 }}>
+            <Divider sx={{ mb: 4 }} />
+            <Grid container spacing={4}>
+              <Grid item xs={12} md={6}>
+                <ReviewForm
+                  productId={product._id}
+                  onReviewSubmitted={handleReviewSubmitted}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <ProductReviews productId={product._id} />
+              </Grid>
+            </Grid>
+          </Box>
+        )}
       </Box>
     </Layout>
   );
