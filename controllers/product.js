@@ -120,10 +120,11 @@ exports.list = async (req, res) => {
   console.log('LIST PRODUCTS - Query params:', { order, sortBy, limit });
 
   try {
+    const sortOrder = order === 'desc' ? -1 : 1;
     const products = await Product.find()
       .select('-photo')
       .populate('category')
-      .sort([[sortBy, order]])
+      .sort({ [sortBy]: sortOrder })
       .limit(limit)
       .exec();
     console.log('LIST PRODUCTS - Found:', products.length, 'products');

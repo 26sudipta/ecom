@@ -21,8 +21,8 @@ const ReviewSlider = () => {
 
   const loadReviews = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const url = `${apiUrl}/api/reviews?limit=10`;
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const url = `${apiUrl}/reviews?limit=10`;
       console.log('ReviewSlider - Fetching reviews from:', url);
       
       const response = await fetch(url);
