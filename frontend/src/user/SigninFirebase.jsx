@@ -1,3 +1,4 @@
+// Enhanced Signin with Firebase Auth (Google & Facebook)
 import React, { useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import Layout from '../core/Layout.jsx';
@@ -22,7 +23,6 @@ import Copyright from '../core/Copyright.jsx';
 import { signin, authenticate, isAuthenticated } from '../auth/index.js';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 
-// Create styled components using MUI v5 styled API
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
   margin: theme.spacing(1),
   backgroundColor: theme.palette.secondary.main,
@@ -47,7 +47,7 @@ const StyledDivider = styled(Divider)(({ theme }) => ({
   margin: theme.spacing(3, 0),
 }));
 
-export default function Signin() {
+export default function SigninFirebase() {
   const [values, setValues] = useState({
     email: '',
     password: '',
@@ -57,8 +57,7 @@ export default function Signin() {
     rememberMe: false,
   });
 
-  const { email, password, loading, error, redirectToReferrer, rememberMe } =
-    values;
+  const { email, password, loading, error, redirectToReferrer, rememberMe } = values;
   const { user } = isAuthenticated();
   
   const { 
@@ -69,24 +68,21 @@ export default function Signin() {
   } = useFirebaseAuth();
 
   const handleChange = (name) => (event) => {
-    const value =
-      name === 'rememberMe' ? event.target.checked : event.target.value;
+    const value = name === 'rememberMe' ? event.target.checked : event.target.value;
     setValues({ ...values, error: '', [name]: value });
   };
 
-  const clickSubmit = (event) => {
+  const clickSubmit = async (event) => {
     event.preventDefault();
     setValues({ ...values, error: '', loading: true });
 
+    // Traditional backend authentication
     signin({ email, password, rememberMe }).then((data) => {
       if (data.error) {
         setValues({ ...values, error: data.error, loading: false });
       } else {
         authenticate(data, () => {
-          setValues({
-            ...values,
-            redirectToReferrer: true,
-          });
+          setValues({ ...values, redirectToReferrer: true });
         });
       }
     });
@@ -97,6 +93,7 @@ export default function Signin() {
     const result = await signInGoogle();
     
     if (result.success) {
+      // Sync Firebase user with your backend
       await syncFirebaseUserWithBackend(result.user);
       setValues({ ...values, redirectToReferrer: true, loading: false });
     } else {
@@ -109,6 +106,7 @@ export default function Signin() {
     const result = await signInFacebook();
     
     if (result.success) {
+      // Sync Firebase user with your backend
       await syncFirebaseUserWithBackend(result.user);
       setValues({ ...values, redirectToReferrer: true, loading: false });
     } else {
@@ -116,6 +114,7 @@ export default function Signin() {
     }
   };
 
+  // Sync Firebase user with backend
   const syncFirebaseUserWithBackend = async (firebaseUser) => {
     try {
       const idToken = await firebaseUser.getIdToken();
@@ -143,6 +142,7 @@ export default function Signin() {
       }
     } catch (err) {
       console.error('Error syncing user with backend:', err);
+      setValues({ ...values, error: 'Failed to sync with server', loading: false });
     }
   };
 
@@ -173,12 +173,115 @@ export default function Signin() {
     }
   };
 
+  const signInForm = () => (
+    <FormContainer onSubmit={clickSubmit}>
+      <TextField
+        variant='outlined'
+        margin='normal'
+        required
+        fullWidth
+        id='email'
+        label='Email Address'
+        name='email'
+        autoComplete='email'
+        autoFocus
+        value={email}
+        onChange={handleChange('email')}
+      />
+      <TextField
+        variant='outlined'
+        margin='normal'
+        required
+        fullWidth
+        name='password'
+        label='Password'
+        type='password'
+        id='password'
+        autoComplete='current-password'
+        value={password}
+        onChange={handleChange('password')}
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            value='remember'
+            color='primary'
+            checked={rememberMe}
+            onChange={handleChange('rememberMe')}
+          />
+        }
+        label='Remember me'
+      />
+      <SubmitButton
+        type='submit'
+        fullWidth
+        variant='contained'
+        color='primary'
+        disabled={loading || firebaseLoading}
+      >
+        Sign In
+      </SubmitButton>
+
+      <StyledDivider>OR</StyledDivider>
+      
+      <SocialButton
+        fullWidth
+        variant='outlined'
+        startIcon={<GoogleIcon />}
+        onClick={handleGoogleSignIn}
+        disabled={loading || firebaseLoading}
+        sx={{
+          borderColor: '#4285F4',
+          color: '#4285F4',
+          '&:hover': {
+            borderColor: '#357ae8',
+            backgroundColor: 'rgba(66, 133, 244, 0.04)',
+          },
+        }}
+      >
+        Continue with Google
+      </SocialButton>
+
+      <SocialButton
+        fullWidth
+        variant='outlined'
+        startIcon={<FacebookIcon />}
+        onClick={handleFacebookSignIn}
+        disabled={loading || firebaseLoading}
+        sx={{
+          borderColor: '#1877F2',
+          color: '#1877F2',
+          '&:hover': {
+            borderColor: '#166fe5',
+            backgroundColor: 'rgba(24, 119, 242, 0.04)',
+          },
+        }}
+      >
+        Continue with Facebook
+      </SocialButton>
+
+      <Grid container sx={{ mt: 2 }}>
+        <Grid item xs>
+          <Link to='/forgot-password' style={{ fontSize: '0.875rem' }}>
+            Forgot password?
+          </Link>
+        </Grid>
+        <Grid item>
+          <Link to='/signup' style={{ fontSize: '0.875rem' }}>
+            {"Don't have an account? Sign Up"}
+          </Link>
+        </Grid>
+      </Grid>
+    </FormContainer>
+  );
+
   return (
     <Layout
-      title='Signin page'
-      description='Signin to MERN E-commerce App'
+      title='Signin'
+      description='Signin to MERN E-commerce'
       className='container col-md-8 offset-md-2'
     >
+      {showLoading()}
       <Container component='main' maxWidth='xs'>
         <CssBaseline />
         <Box
@@ -193,119 +296,14 @@ export default function Signin() {
             <LockOutlinedIcon />
           </StyledAvatar>
           <Typography component='h1' variant='h5'>
-            Sign in
+            Sign In
           </Typography>
           {showError()}
-          {showLoading()}
-          {redirectUser()}
-          <FormContainer onSubmit={clickSubmit}>
-            <TextField
-              variant='outlined'
-              margin='normal'
-              required
-              fullWidth
-              id='email'
-              label='Email Address'
-              name='email'
-              autoComplete='email'
-              autoFocus
-              onChange={handleChange('email')}
-              value={email}
-            />
-            <TextField
-              variant='outlined'
-              margin='normal'
-              required
-              fullWidth
-              name='password'
-              label='Password'
-              type='password'
-              id='password'
-              autoComplete='current-password'
-              onChange={handleChange('password')}
-              value={password}
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value='remember'
-                  color='primary'
-                  checked={rememberMe}
-                  onChange={handleChange('rememberMe')}
-                />
-              }
-              label='Remember me'
-            />
-            <SubmitButton
-              type='submit'
-              fullWidth
-              variant='contained'
-              color='primary'
-              disabled={loading || firebaseLoading}
-            >
-              Sign In
-            </SubmitButton>
-
-            <StyledDivider>OR</StyledDivider>
-
-            <SocialButton
-              fullWidth
-              variant='outlined'
-              startIcon={<GoogleIcon />}
-              onClick={handleGoogleSignIn}
-              disabled={loading || firebaseLoading}
-              sx={{
-                borderColor: '#db4437',
-                color: '#db4437',
-                '&:hover': {
-                  borderColor: '#c23321',
-                  backgroundColor: 'rgba(219, 68, 55, 0.04)',
-                },
-              }}
-            >
-              Sign in with Google
-            </SocialButton>
-
-            <SocialButton
-              fullWidth
-              variant='outlined'
-              startIcon={<FacebookIcon />}
-              onClick={handleFacebookSignIn}
-              disabled={loading || firebaseLoading}
-              sx={{
-                borderColor: '#4267B2',
-                color: '#4267B2',
-                '&:hover': {
-                  borderColor: '#365899',
-                  backgroundColor: 'rgba(66, 103, 178, 0.04)',
-                },
-              }}
-            >
-              Sign in with Facebook
-            </SocialButton>
-
-            <Grid container sx={{ mt: 2 }}>
-              <Grid item xs>
-                <Link to='#' style={{ textDecoration: 'none' }}>
-                  <Typography variant='body2' color='primary'>
-                    Forgot password?
-                  </Typography>
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link to='/signup' style={{ textDecoration: 'none' }}>
-                  <Typography variant='body2' color='primary'>
-                    {"Don't have an account? Sign Up"}
-                  </Typography>
-                </Link>
-              </Grid>
-            </Grid>
-          </FormContainer>
+          {signInForm()}
         </Box>
-        <Box mt={8}>
-          <Copyright />
-        </Box>
+        <Copyright sx={{ mt: 8, mb: 4 }} />
       </Container>
+      {redirectUser()}
     </Layout>
   );
 }

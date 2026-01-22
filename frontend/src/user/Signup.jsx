@@ -7,13 +7,18 @@ import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import GoogleIcon from '@mui/icons-material/Google';
+import FacebookIcon from '@mui/icons-material/Facebook';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Alert from '@mui/material/Alert';
+import Divider from '@mui/material/Divider';
+import CircularProgress from '@mui/material/CircularProgress';
 import { styled } from '@mui/material/styles';
 import Copyright from '../core/Copyright.jsx';
 import Layout from '../core/Layout.jsx';
 import { signup } from '../auth/index.js';
+import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
   margin: theme.spacing(1),
@@ -30,6 +35,16 @@ const SubmitButton = styled(Button)(({ theme }) => ({
   padding: theme.spacing(1.5),
 }));
 
+const SocialButton = styled(Button)(({ theme }) => ({
+  margin: theme.spacing(1, 0),
+  padding: theme.spacing(1.5),
+  textTransform: 'none',
+}));
+
+const StyledDivider = styled(Divider)(({ theme }) => ({
+  margin: theme.spacing(3, 0),
+}));
+
 export default function Signup() {
   const [values, setValues] = useState({
     name: '',
@@ -41,6 +56,13 @@ export default function Signup() {
   });
 
   const { name, email, password, success, error, loading } = values;
+
+  const {
+    signInGoogle,
+    signInFacebook,
+    loading: firebaseLoading,
+    error: firebaseError,
+  } = useFirebaseAuth();
 
   const handleChange = (name) => (event) => {
     setValues({ ...values, error: '', [name]: event.target.value });
@@ -71,11 +93,86 @@ export default function Signup() {
     });
   };
 
+  const handleGoogleSignUp = async () => {
+    setValues({ ...values, error: '', loading: true });
+    const result = await signInGoogle();
+
+    if (result.success) {
+      await syncFirebaseUserWithBackend(result.user);
+      setValues({
+        ...values,
+        name: '',
+        email: '',
+        password: '',
+        error: '',
+        success: true,
+        loading: false,
+      });
+    } else {
+      setValues({ ...values, error: result.error || 'Google sign-up failed', loading: false });
+    }
+  };
+
+  const handleFacebookSignUp = async () => {
+    setValues({ ...values, error: '', loading: true });
+    const result = await signInFacebook();
+
+    if (result.success) {
+      await syncFirebaseUserWithBackend(result.user);
+      setValues({
+        ...values,
+        name: '',
+        email: '',
+        password: '',
+        error: '',
+        success: true,
+        loading: false,
+      });
+    } else {
+      setValues({ ...values, error: result.error || 'Facebook sign-up failed', loading: false });
+    }
+  };
+
+  const syncFirebaseUserWithBackend = async (firebaseUser) => {
+    try {
+      const idToken = await firebaseUser.getIdToken();
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/firebase-signup`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            idToken,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL,
+            uid: firebaseUser.uid,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error('Error syncing user with backend:', err);
+    }
+  };
+
   const showError = () =>
-    error && (
+    (error || firebaseError) && (
       <Alert severity='error' sx={{ width: '100%', mb: 2 }}>
-        {error}
+        {error || firebaseError}
       </Alert>
+    );
+
+  const showLoading = () =>
+    (loading || firebaseLoading) && (
+      <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
+        <CircularProgress />
+      </Box>
     );
 
   const showSuccess = () =>
@@ -104,6 +201,7 @@ export default function Signup() {
         >
           {showSuccess()}
           {showError()}
+          {showLoading()}
 
           <StyledAvatar>
             <LockOutlinedIcon />
@@ -160,10 +258,48 @@ export default function Signup() {
               type='submit'
               fullWidth
               variant='contained'
-              disabled={loading}
+              disabled={loading || firebaseLoading}
             >
               {loading ? 'Creating Account...' : 'Sign Up'}
             </SubmitButton>
+
+            <StyledDivider>OR</StyledDivider>
+
+            <SocialButton
+              fullWidth
+              variant='outlined'
+              startIcon={<GoogleIcon />}
+              onClick={handleGoogleSignUp}
+              disabled={loading || firebaseLoading}
+              sx={{
+                borderColor: '#4285F4',
+                color: '#4285F4',
+                '&:hover': {
+                  borderColor: '#357ae8',
+                  backgroundColor: 'rgba(66, 133, 244, 0.04)',
+                },
+              }}
+            >
+              Sign up with Google
+            </SocialButton>
+
+            <SocialButton
+              fullWidth
+              variant='outlined'
+              startIcon={<FacebookIcon />}
+              onClick={handleFacebookSignUp}
+              disabled={loading || firebaseLoading}
+              sx={{
+                borderColor: '#1877F2',
+                color: '#1877F2',
+                '&:hover': {
+                  borderColor: '#166fe5',
+                  backgroundColor: 'rgba(24, 119, 242, 0.04)',
+                },
+              }}
+            >
+              Sign up with Facebook
+            </SocialButton>
 
             <Grid container justifyContent='flex-end'>
               <Grid item>
